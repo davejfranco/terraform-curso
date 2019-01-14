@@ -7,12 +7,14 @@ provider "oci" {
   region = "${var.region}"
 }
 
-# Get a list of Availability Domains
+#Get a list of Availability Domains
 data "oci_identity_availability_domains" "ads" {
   compartment_id = "${var.tenancy_ocid}"
 }
 
-# Output the result
-output "show-ads" {
-  value = "${data.oci_identity_availability_domains.ads.availability_domains}"
-}
+#Output the result
+# output "show-ads" {
+#   value = "${data.oci_identity_availability_domains.ads.availability_domains}"
+# }
+
+
