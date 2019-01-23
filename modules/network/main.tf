@@ -9,6 +9,10 @@ resource "oci_identity_compartment" "net_compartment" {
     freeform_tags = {"Environment"= "${var.env}"}
 }
 
+data "oci_identity_availability_domains" "ads" {
+  compartment_id = "${var.tenancy_ocid}"
+}
+
 #Virtual Network
 resource "oci_core_vcn" "vcn" {
     #Required
@@ -31,8 +35,7 @@ resource "oci_core_internet_gateway" "net_ig" {
     freeform_tags = {"Environment"= "${var.env}"}
 }
 
-
-#First Subnet
+#Subnets
 resource "oci_core_subnet" "net_subnets" {
     count = "${length(var.vcn_pub_nets)}"
     #Required
@@ -68,7 +71,6 @@ resource "oci_core_route_table" "net_route_table" {
 resource "oci_core_route_table_attachment" "net_route_table_attachment" {
   count = "${length(var.vcn_pub_nets)}"
   #Required 
-  #subnet_id = "${oci_core_subnet.test_subnet.id}"
   subnet_id = "${element(oci_core_subnet.net_subnets.*.id, count.index)}"
   route_table_id ="${oci_core_route_table.net_route_table.id}"
 }
