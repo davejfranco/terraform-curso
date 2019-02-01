@@ -19,15 +19,20 @@ Vagrant.configure("2") do |config|
   # end
   #
 
-  config.vm.provision "shell", inline: <<-SHELL
-    yum update -y
-    mv /etc/yum.repos.d/public-yum-ol7.repo /etc/yum.repos.d/public-yum-ol7.repo.bak
-    wget -O /etc/yum.repos.d/public-yum-ol7.repo http://yum.oracle.com/public-yum-ol7.repo
-    yum install -y yum-utils
-    yum-config-manager --enable ol7_developer_php72
-    yum install unzip php
-    wget http://wordpress.org/latest.zip
-    mkdir -p /var/www/html && mv wordpress/ /var/www/html
+  # config.vm.provision "shell", inline: <<-SHELL
+  #   yum update -y
+  #   mv /etc/yum.repos.d/public-yum-ol7.repo /etc/yum.repos.d/public-yum-ol7.repo.bak
+  #   wget -O /etc/yum.repos.d/public-yum-ol7.repo http://yum.oracle.com/public-yum-ol7.repo
+  #   yum install -y yum-utils
+  #   yum-config-manager --enable ol7_developer_php72
+  #   #yum install unzip php php-mysql
+  #   #wget http://wordpress.org/latest.zip && unzip latest.zip
+  #   #mkdir -p /var/www/html && mv wordpress/ /var/www/html
     
-  SHELL
+  # SHELL
+
+  config.vm.provision "shell",
+    inline: "/vagrant/provision.sh"
+
+
 end
