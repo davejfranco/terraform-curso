@@ -1,29 +1,24 @@
 # -*- mode: ruby -*-
 
+require 'yaml'
+secrets = YAML.load_file 'secret.yaml'
+
+# $script = <<-SCRIPT
+# export NEWPASS="$1"
+# SCRIPT
+
 Vagrant.configure("2") do |config|
-
   config.vm.box = "ol76"
-  # config.vm.network "forwarded_port", guest: 80, host: 8080, host_ip: "127.0.0.1"
-  # config.vm.network "private_network", ip: "192.168.33.10"
-  # config.vm.network "public_network"
+  
+  config.vm.provider "virtualbox" do |vb|
+   # Display the VirtualBox GUI when booting the machine
+   vb.memory = "1024"
+  end
+  
+  config.vm.provision "shell",
+    path: "mysql_setup.sh",
+    args: [secrets['newpass'], secrets['wppass']]
+  
 
-  # config.vm.synced_folder "../data", "/vagrant_data"
-
- 
-  # config.vm.provider "virtualbox" do |vb|
-  #   # Display the VirtualBox GUI when booting the machine
-  #   vb.gui = true
-  #
-  #   # Customize the amount of memory on the VM:
-  #   vb.memory = "1024"
-  # end
-  #
-
-  config.vm.provision "shell", inline: <<-SHELL
-    yum update -y 
-    yum install -y https://dev.mysql.com/get/mysql80-community-release-el7-1.noarch.rpm
-    yum install -y mysql-server
-    systemctl start mysqld
-    MYSQLPASS=$(grep 'temporary password' /var/log/mysqld.log | cut -d" " -f13)
-  SHELL
 end
+
