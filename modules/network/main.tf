@@ -3,7 +3,7 @@ resource "oci_identity_compartment" "net_compartment" {
     #Required
     compartment_id = "${var.tenancy_ocid}"
     description = "A compartment to test OCI with terraform deployment"
-    name = "IAC_demo"
+    name = "${var.compartment_name}"
 
     #Optional
     freeform_tags = {"Environment"= "${var.env}"}
@@ -24,6 +24,7 @@ resource "oci_core_vcn" "vcn" {
     freeform_tags = {"Environment"= "${var.env}"}
 }
 
+#Public Access
 #Internet Gateway
 resource "oci_core_internet_gateway" "net_ig" {
     #Required
@@ -35,8 +36,8 @@ resource "oci_core_internet_gateway" "net_ig" {
     freeform_tags = {"Environment"= "${var.env}"}
 }
 
-#Subnets
-resource "oci_core_subnet" "net_subnets" {
+#Public Subnets
+resource "oci_core_subnet" "net_pub_subnets" {
     count = "${length(var.vcn_pub_nets)}"
     #Required
     availability_domain = "${lookup(data.oci_identity_availability_domains.ads.availability_domains[count.index], "name")}"
@@ -52,7 +53,7 @@ resource "oci_core_subnet" "net_subnets" {
 }
 
 #Route Table
-resource "oci_core_route_table" "net_route_table" {
+resource "oci_core_route_table" "net_pub_route_table" {
     #Required
     compartment_id = "${oci_identity_compartment.net_compartment.id}"
     route_rules {
@@ -64,13 +65,64 @@ resource "oci_core_route_table" "net_route_table" {
     vcn_id = "${oci_core_vcn.vcn.id}"
 
     #Optional
-    display_name = "main"
+    display_name = "Public Route Table"
     freeform_tags = {"Environment"= "${var.env}"}
 }
 
-resource "oci_core_route_table_attachment" "net_route_table_attachment" {
+resource "oci_core_route_table_attachment" "net_pub_route_table_attachment" {
   count = "${length(var.vcn_pub_nets)}"
   #Required 
-  subnet_id = "${element(oci_core_subnet.net_subnets.*.id, count.index)}"
-  route_table_id ="${oci_core_route_table.net_route_table.id}"
+  subnet_id = "${element(oci_core_subnet.net_pub_subnets.*.id, count.index)}"
+  route_table_id ="${oci_core_route_table.net_pub_route_table.id}"
+}
+
+#Private Access
+resource "oci_core_nat_gateway" "net_nat_gw" {
+    #Required
+    compartment_id = "${oci_identity_compartment.net_compartment.id}"
+    vcn_id = "${oci_core_vcn.vcn.id}"
+
+    #Optional
+    display_name = "${var.nat_gateway_display_name}"
+    freeform_tags = {
+        "Environment"= "${var.env}"
+        }
+}
+
+resource "oci_core_subnet" "net_priv_subnets" {
+    count = "${length(var.vcn_priv_nets)}"
+    #Required
+    availability_domain = "${lookup(data.oci_identity_availability_domains.ads.availability_domains[count.index], "name")}"
+    cidr_block = "${element(var.vcn_priv_nets, count.index)}"
+    compartment_id = "${oci_identity_compartment.net_compartment.id}"
+    security_list_ids = ["${oci_core_vcn.vcn.default_security_list_id}"]
+    vcn_id = "${oci_core_vcn.vcn.id}"
+
+    #Optional
+    display_name = "priv_subnet_${lookup(data.oci_identity_availability_domains.ads.availability_domains[count.index], "name")}_${count.index + 1}"
+    freeform_tags = {"Environment"= "${var.env}"}
+    route_table_id = "${oci_core_vcn.vcn.default_route_table_id}"
+}
+
+resource "oci_core_route_table" "net_priv_route_table" {
+    #Required
+    compartment_id = "${oci_identity_compartment.net_compartment.id}"
+    route_rules {
+        #Required
+        network_entity_id = "${oci_core_nat_gateway.net_nat_gw.id}"
+        #Optional
+        destination = "0.0.0.0/0"
+    }
+    vcn_id = "${oci_core_vcn.vcn.id}"
+
+    #Optional
+    display_name = "Private Route Table"
+    freeform_tags = {"Environment"= "${var.env}"}
+}
+
+resource "oci_core_route_table_attachment" "net_priv_route_table_attachment" {
+  count = "${length(var.vcn_priv_nets)}"
+  #Required 
+  subnet_id = "${element(oci_core_subnet.net_priv_subnets.*.id, count.index)}"
+  route_table_id ="${oci_core_route_table.net_priv_route_table.id}"
 }
