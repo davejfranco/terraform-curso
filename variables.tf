@@ -8,7 +8,7 @@ variable "private_key_path" {}
 variable "region" {}
 
 variable "env" {
-    default = "devlopment"
+    default = "development"
   
 }
 
@@ -35,6 +35,25 @@ variable "vcn_priv_nets" {
 }
 
 variable "vcn_display_name" {
-  default = "vcn_test"
+  default = "terraform_demo_vcn"
 }
 
+# #Kubernetes Cluster
+# variable "compartment_id" { type = "string" }
+# variable "k8s_version" { type = "string" }
+
+# variable "cluster_name" { type = "string" }
+
+# variable "vcn_id" { type = "string" }
+
+# variable "k8s_dashboard_enabled" { type = "bool" default = true }
+# variable "k8s_tiller_enabled" { type = "bool" default = true }
+
+# variable "service_lb_subnet_ids" { type = "list" }
+
+# variable "node_pool_name" { type = "string" }
+# variable "node_pool_subnet_ids" { type = "list" }
+# variable "node_pool_environment" { type = "string" }
+# variable "node_pool_quantity_per_subnet" { type = "number" default = 1 }
+
+# variable "node_pool_ssh_public_key" { type = "string" }
