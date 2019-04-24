@@ -1,5 +1,7 @@
 variable "tenancy_ocid" { type = "string" }
 
+variable "compartment_id" { type = "string" }
+
 variable "compartment_name" { type = "string" default = "network"}
 
 variable "env" { type = "string" }
