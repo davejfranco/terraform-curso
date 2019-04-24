@@ -71,17 +71,6 @@ resource "oci_core_subnet" "net_pub_subnets" {
     route_table_id = "${oci_core_route_table.net_pub_route_table.id}"
 }
 
-# resource "oci_core_route_table_attachment" "net_pub_route_table_attachment" {
-#   count = "${length(var.vcn_pub_nets)}"
-#   #Required 
-#   subnet_id = "${element(oci_core_subnet.net_pub_subnets.*.id, count.index)}"
-#   route_table_id ="${oci_core_route_table.net_pub_route_table.id}"
-
-#   lifecycle {
-#       ignore_changes = ["route_table_id"]
-#   }
-# }
-
 #Private Access
 resource "oci_core_nat_gateway" "net_nat_gw" {
     #Required
@@ -128,11 +117,3 @@ resource "oci_core_subnet" "net_priv_subnets" {
     route_table_id = "${oci_core_route_table.net_priv_route_table.id}"
 
 }
-
-# resource "oci_core_route_table_attachment" "net_priv_route_table_attachment" {
-#   count = "${length(var.vcn_priv_nets)}"
-#   #Required 
-#   subnet_id = "${element(oci_core_subnet.net_priv_subnets.*.id, count.index)}"
-#   route_table_id ="${oci_core_route_table.net_priv_route_table.id}"
-    
-# }
